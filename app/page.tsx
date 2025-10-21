@@ -106,22 +106,42 @@ export default function Home() {
   const toggleAction = async (key: string) => {
     const isCurrentlyCompleted = completed[key];
     
+    // Update local state first
+    const newCompleted = {
+      ...completed,
+      [key]: !completed[key]
+    };
+    
+    // Determine which section this action belongs to
+    const [sectionKey] = key.split('-'); // "startup" or "interna"
+    const sectionActions = etapa[sectionKey === 'startup' ? 'startup' : 'mind'].actions;
+    
+    // Check how many actions in this section will be completed after this toggle
+    const sectionCompletedCount = sectionActions.reduce((count, _, index) => {
+      const actionKey = `${sectionKey}-${index}`;
+      return count + (newCompleted[actionKey] ? 1 : 0);
+    }, 0);
+    
+    const allSectionActionsCompleted = sectionCompletedCount === sectionActions.length;
+    const wasAllSectionActionsCompleted = sectionActions.reduce((count, _, index) => {
+      const actionKey = `${sectionKey}-${index}`;
+      return count + (completed[actionKey] ? 1 : 0);
+    }, 0) === sectionActions.length;
+    
     try {
-      if (!isCurrentlyCompleted) {
-        // User is selecting the action - complete it on blockchain
-        await completeAction(key);
+      // Only call blockchain functions when completing or uncompleting the entire section
+      if (!isCurrentlyCompleted && allSectionActionsCompleted) {
+        // User just completed all actions in this section - complete on blockchain
+        await completeAction(sectionKey); // Use section key instead of individual action key
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 1200);
-      } else {
-        // User is unselecting the action - uncomplete it on blockchain
-        await uncompleteAction(key);
+      } else if (isCurrentlyCompleted && wasAllSectionActionsCompleted && !allSectionActionsCompleted) {
+        // User was at full completion and now uncompleting - uncomplete on blockchain
+        await uncompleteAction(sectionKey); // Use section key instead of individual action key
       }
       
       // Update local state after successful blockchain transaction
-      setCompleted((prev) => ({
-        ...prev,
-        [key]: !prev[key]
-      }));
+      setCompleted(newCompleted);
       
     } catch (error) {
       console.error('Error toggling action:', error);
