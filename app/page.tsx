@@ -274,7 +274,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="h-[calc(844px-148px)] md:h-auto overflow-y-auto  md:w-[80%] md:mx-auto">
+          <div className="min-h-screen md:h-auto overflow-y-auto  md:w-[80%] md:mx-auto">
             <div className="px-4 pt-4 md:mt-8">
               <Tabs value={tab} onValueChange={(v) => setTab(v)} className="w-full">
                 <TabsList className="grid grid-cols-3 h-9 md:h-12 mx-auto">
