@@ -223,7 +223,6 @@ export default function Home() {
           <div className="flex flex-col h-full items-center justify-center p-6 text-center">
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <div className="w-16 h-16 bg-linear-to-r from-blue-500 to-pink-500 rounded-full flex items-center justify-center mb-6 mx-auto">
-                {/* <Wallet className="w-8 h-8 text-white" /> */}
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-3">
                 Conectá tu Wallet
@@ -248,12 +247,12 @@ export default function Home() {
       {/* Main App Content - Only show when onboarding is done AND wallet is connected */}
       {!showOnboarding && isConnected && (
         <>
-          <div className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-gray-100">
-            <div className="px-4 md:px-8 py-3 md:py-10">
-              <h1 className="text-xl font-bold text-gray-900 mt-6">
+          <div className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-gray-100  md:w-[80%] md:mx-auto">
+            <div className="px-4 md:px-8 py-3 md:py-10 ">
+              <h1 className="text-xl md:text-3xl font-bold text-gray-900 mt-6">
                 Etapa {step + 1}: {etapa.title}
               </h1>
-              <p className="text-gray-500 text-xs leading-relaxed max-h-20 overflow-hidden mt-4">
+              <p className="text-gray-500 text-xs md:text-md leading-relaxed max-h-20 overflow-hidden mt-4">
                 {etapa.story}
               </p>
               <div className="mt-3 h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -264,7 +263,7 @@ export default function Home() {
                 />
               </div>
               <div className="flex items-center justify-between mt-1">
-                <span className="text-[11px] text-gray-500">
+                <span className="text-[11px] md:text-[15px] text-gray-500">
                   {Math.round(progress)}% — {Object.values(completed).filter(Boolean).length}/
                   {etapa.startup.actions.length + etapa.mind.actions.length} acciones
                 </span>
@@ -275,13 +274,13 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="h-[calc(844px-148px)] overflow-y-auto">
+          <div className="h-[calc(844px-148px)] md:h-auto overflow-y-auto  md:w-[80%] md:mx-auto">
             <div className="px-4 pt-4 md:mt-8">
               <Tabs value={tab} onValueChange={(v) => setTab(v)} className="w-full">
-                <TabsList className="grid grid-cols-3 h-9 mx-auto">
-                  <TabsTrigger value="leccion" className="text-xs">Lección</TabsTrigger>
-                  <TabsTrigger value="accion" className="text-xs">Acción</TabsTrigger>
-                  <TabsTrigger value="herramienta" className="text-xs">Herramienta</TabsTrigger>
+                <TabsList className="grid grid-cols-3 h-9 md:h-12 mx-auto">
+                  <TabsTrigger value="leccion" className="text-xs md:text-sm">Lección</TabsTrigger>
+                  <TabsTrigger value="accion" className="text-xs md:text-sm">Acción</TabsTrigger>
+                  <TabsTrigger value="herramienta" className="text-xs md:text-sm">Herramienta</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="leccion" className="mt-3 md:mt-10">
@@ -298,7 +297,7 @@ export default function Home() {
                 </TabsContent>
 
                 <TabsContent value="accion" className="mt-3 md:mt-10">
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {[
                       { color: "blue" as ColorKey, key: "startup", data: etapa.startup },
                       { color: "pink" as ColorKey, key: "interna", data: etapa.mind },
@@ -310,8 +309,8 @@ export default function Home() {
                           whileHover={{ scale: 1.005 }}
                           className={`rounded-xl p-4 border ${styles.card}`}
                         >
-                          <h2 className={`${styles.title} font-semibold text-sm mb-2`}>
-                            {block.key === "startup" ? "🚀 Versión Startup" : "💗 Versión Interna"}
+                          <h2 className={`${styles.title} font-semibold text-sm md:text-xl mb-2`}>
+                            {block.key === "startup" ? "🚀 Versión Startup" : "🧠 Versión Interna"}
                           </h2>
                           <ul className="space-y-2">
                             {block.data.actions.map((act, j) => {
@@ -327,7 +326,7 @@ export default function Home() {
                                     isDone ? styles.filled : styles.border
                                   } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
-                                  <span className="text-[13px] text-left pr-2">{act}</span>
+                                  <span className="text-[13px] md:text-[16px] text-left pr-2">{act}</span>
                                   {isLoading ? (
                                     <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin shrink-0" />
                                   ) : (
@@ -337,7 +336,7 @@ export default function Home() {
                               );
                             })}
                           </ul>
-                          <p className="text-[11px] text-gray-500 mt-2 text-center">
+                          <p className="text-[11px] md:text-[15px] text-gray-500 mt-2 text-center">
                             Completá las acciones y ganá 5 🪙
                           </p>
                         </motion.div>
@@ -347,18 +346,18 @@ export default function Home() {
                 </TabsContent>
 
                 <TabsContent value="herramienta" className="mt-3 md:mt-10">
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:w-[80%] md:mx-auto">
                     <motion.div whileHover={{ scale: 1.01 }} className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
-                      <h2 className="text-blue-700 font-semibold text-sm mb-2">🚀 Versión Startup</h2>
-                      <p className="text-gray-700 text-sm mb-3">{etapa.startup.tool}</p>
-                      <Button variant="outline" className="h-9 text-sm" onClick={() => handleDownload("guia-problemas.md", etapa.startup.tool)}>
+                      <h2 className="text-blue-700 font-semibold text-sm md:text-[16px] mb-2">🚀 Versión Startup</h2>
+                      <p className="text-gray-700 text-sm md:text-[16px] mb-3">{etapa.startup.tool}</p>
+                      <Button variant="outline" className="h-9 text-sm md:text-[16px]" onClick={() => handleDownload("guia-problemas.md", etapa.startup.tool)}>
                         Descargar
                       </Button>
                     </motion.div>
                     <motion.div whileHover={{ scale: 1.01 }} className="bg-pink-50 border border-pink-200 rounded-xl p-4 text-center">
-                      <h2 className="text-pink-700 font-semibold text-sm mb-2">💗 Versión Interna</h2>
-                      <p className="text-gray-700 text-sm mb-3">{etapa.mind.tool}</p>
-                      <Button variant="outline" className="h-9 text-sm" onClick={() => handleDownload("diario-emocional.md", etapa.mind.tool)}>
+                      <h2 className="text-pink-700 font-semibold text-sm md:text-[16px] mb-2">🧠 Versión Interna</h2>
+                      <p className="text-gray-700 text-sm md:text-[16px] mb-3">{etapa.mind.tool}</p>
+                      <Button variant="outline" className="h-9 text-sm md:text-[16px]" onClick={() => handleDownload("diario-emocional.md", etapa.mind.tool)}>
                         Descargar
                       </Button>
                     </motion.div>
