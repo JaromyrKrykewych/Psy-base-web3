@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CheckCircle2, Coins, Award } from "lucide-react";
 import Confetti from "react-confetti";
-import { usePsychologyCoins } from "@/hooks/usePsychologyCoins";
+import { usePsychologyCoins, useActionStatus } from "@/hooks/usePsychologyCoins";
 
 export default function Home() {
   const { 
@@ -71,6 +71,19 @@ export default function Home() {
   ];
 
   const etapa = etapas[step];
+
+  // Check completion status for specific actions to determine coin rewards
+  const startup0Status = useActionStatus(`startup-0`);
+  const startup1Status = useActionStatus(`startup-1`);
+  const startup2Status = useActionStatus(`startup-2`);
+  
+  const interna0Status = useActionStatus(`interna-0`);
+  const interna1Status = useActionStatus(`interna-1`);
+  const interna2Status = useActionStatus(`interna-2`);
+
+  // Determine if user has completed any actions in each section before
+  const hasCompletedStartupActions = startup0Status.hasCompleted || startup1Status.hasCompleted || startup2Status.hasCompleted;
+  const hasCompletedMindActions = interna0Status.hasCompleted || interna1Status.hasCompleted || interna2Status.hasCompleted;
 
   type ColorKey = 'blue' | 'pink';
   
@@ -330,6 +343,12 @@ export default function Home() {
                       { color: "pink" as ColorKey, key: "interna", data: etapa.mind },
                     ].map((block, i) => {
                       const styles = colorStyles[block.color];
+                      
+                      // Determine coin reward: 5 for first time, 1 for repeat
+                      const coinReward = block.key === "startup" 
+                        ? (hasCompletedStartupActions ? 1 : 5)
+                        : (hasCompletedMindActions ? 1 : 5);
+                      
                       return (
                         <motion.div
                           key={i}
@@ -364,7 +383,7 @@ export default function Home() {
                             })}
                           </ul>
                           <p className="text-[11px] md:text-[15px] text-gray-500 mt-2 text-center">
-                            Completá las acciones y ganá 5 🪙
+                            Completá las acciones y ganá {coinReward} 🪙
                           </p>
                         </motion.div>
                       );
