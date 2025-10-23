@@ -1,7 +1,11 @@
 import { useState, useCallback } from 'react';
 import { useAccount, useWriteContract, useReadContract } from 'wagmi';
 import { formatEther } from 'viem'; //  parseEther,
+import { baseSepolia } from 'wagmi/chains';
 import PsychologyCoinsAbi from '../abi/PsychologyCoins.json';
+
+const CONTRACT_ADDRESS = '0xB9b909a81E3E3254F1E7Db59CaA88CA369d8c100'; 
+const PSYCHOLOGY_COINS_ABI = JSON.parse(JSON.stringify(PsychologyCoinsAbi.abi));
 
 // Custom hook for checking action completion status
 export function useActionStatus(actionId: string) {
@@ -12,6 +16,7 @@ export function useActionStatus(actionId: string) {
     abi: PSYCHOLOGY_COINS_ABI,
     functionName: 'hasUserCompletedAction',
     args: address && actionId ? [address, actionId] : undefined,
+    chainId: baseSepolia.id,
     query: {
       enabled: !!(address && actionId),
     },
@@ -22,6 +27,7 @@ export function useActionStatus(actionId: string) {
     abi: PSYCHOLOGY_COINS_ABI,
     functionName: 'getCompletionCount',
     args: address && actionId ? [address, actionId] : undefined,
+    chainId: baseSepolia.id,
     query: {
       enabled: !!(address && actionId),
     },
@@ -33,20 +39,18 @@ export function useActionStatus(actionId: string) {
   };
 }
 
-const PSYCHOLOGY_COINS_ABI = JSON.parse(JSON.stringify(PsychologyCoinsAbi.abi));
-const CONTRACT_ADDRESS = '0xB9b909a81E3E3254F1E7Db59CaA88CA369d8c100'; 
-
 export function usePsychologyCoins() {
   const { address } = useAccount();
-  const { writeContract } = useWriteContract();
+  const { writeContractAsync } = useWriteContract();
   const [isLoading, setIsLoading] = useState(false);
 
   // Get user's coin balance
-  const { data: balance } = useReadContract({
+  const { data: balance, refetch: refetchBalance } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: PSYCHOLOGY_COINS_ABI,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
+    chainId: baseSepolia.id,
     query: {
       enabled: !!address,
     },
@@ -58,6 +62,7 @@ export function usePsychologyCoins() {
     abi: PSYCHOLOGY_COINS_ABI,
     functionName: 'getTotalActionsCompleted',
     args: address ? [address] : undefined,
+    chainId: baseSepolia.id,
     query: {
       enabled: !!address,
     },
@@ -69,39 +74,26 @@ export function usePsychologyCoins() {
     
     setIsLoading(true);
     try {
-      writeContract({
+      await writeContractAsync({
         address: CONTRACT_ADDRESS,
         abi: PSYCHOLOGY_COINS_ABI,
         functionName: 'completeAction',
         args: [actionId],
+        chainId: baseSepolia.id,
       });
+      
+      // Refetch balance after successful transaction
+      setTimeout(() => {
+        refetchBalance();
+      }, 2000); // Wait 2 seconds for transaction to be mined
+      
     } catch (error) {
       console.error('Error completing action:', error);
       throw error;
     } finally {
       setIsLoading(false);
     }
-  }, [address, writeContract]);
-
-  // Uncomplete an action
-  const uncompleteAction = useCallback(async (actionId: string) => {
-    if (!address) return;
-    
-    setIsLoading(true);
-    try {
-      writeContract({
-        address: CONTRACT_ADDRESS,
-        abi: PSYCHOLOGY_COINS_ABI,
-        functionName: 'uncompleteAction',
-        args: [actionId],
-      });
-    } catch (error) {
-      console.error('Error uncompleting action:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [address, writeContract]);
+  }, [address, writeContractAsync, refetchBalance]);
 
   // Function to check if user has completed a specific action
   const checkActionCompleted = useCallback((actionId: string) => {
@@ -127,7 +119,6 @@ export function usePsychologyCoins() {
     totalActionsCompleted: totalActionsCompleted ? Number(totalActionsCompleted) : 0,
     // Actions
     completeAction,
-    uncompleteAction,
     isLoading,
     checkActionCompleted,
     getCompletionCount,
