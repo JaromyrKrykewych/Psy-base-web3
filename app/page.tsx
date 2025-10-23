@@ -7,10 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CheckCircle2, Coins, Award } from "lucide-react";
 import Confetti from "react-confetti";
-import { usePsychologyCoins } from "@/hooks/usePsychologyCoins";
+import { usePsychologyCoins, useActionStatus } from "@/hooks/usePsychologyCoins";
 
 export default function Home() {
-  const { balance, completeAction, isLoading, isConnected } = usePsychologyCoins();
+  const { 
+    balance, 
+    completeAction, 
+    isLoading, 
+    isConnected, 
+    isCorrectNetwork, 
+    switchToBaseSepolia, 
+    isSwitching 
+  } = usePsychologyCoins();
 
   const [step, setStep] = useState(0);
   const [tab, setTab] = useState("leccion");
@@ -63,6 +71,19 @@ export default function Home() {
   ];
 
   const etapa = etapas[step];
+
+  // Check completion status for specific actions to determine coin rewards
+  const startup0Status = useActionStatus(`startup-0`);
+  const startup1Status = useActionStatus(`startup-1`);
+  const startup2Status = useActionStatus(`startup-2`);
+  
+  const interna0Status = useActionStatus(`interna-0`);
+  const interna1Status = useActionStatus(`interna-1`);
+  const interna2Status = useActionStatus(`interna-2`);
+
+  // Determine if user has completed any actions in each section before
+  const hasCompletedStartupActions = startup0Status.hasCompleted || startup1Status.hasCompleted || startup2Status.hasCompleted;
+  const hasCompletedMindActions = interna0Status.hasCompleted || interna1Status.hasCompleted || interna2Status.hasCompleted;
 
   type ColorKey = 'blue' | 'pink';
   
@@ -231,8 +252,40 @@ export default function Home() {
         </div>
       )}
 
-      {/* Main App Content - Only show when onboarding is done AND wallet is connected */}
-      {!showOnboarding && isConnected && (
+      {/* Network Switch Required Screen */}
+      {!showOnboarding && isConnected && !isCorrectNetwork && (
+        <div className="absolute inset-0 z-20 bg-white">
+          <div className="flex flex-col h-full items-center justify-center p-6 text-center">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <div className="w-16 h-16 bg-linear-to-r from-blue-500 to-pink-500 rounded-full flex items-center justify-center mb-6 mx-auto">
+                <Award className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                Cambiar a Base Sepolia
+              </h2>
+              <p className="text-gray-600 text-base max-w-sm mb-8">
+                Para usar Psychology for Founders, necesitás cambiar tu wallet a la red Base Sepolia donde están los contratos.
+              </p>
+              <Button 
+                onClick={switchToBaseSepolia}
+                disabled={isSwitching}
+                className="w-full max-w-sm bg-linear-to-r from-blue-500 to-pink-500 hover:from-blue-600 hover:to-pink-600"
+              >
+                {isSwitching ? "Cambiando red..." : "Cambiar a Base Sepolia"}
+              </Button>
+              <button 
+                onClick={() => setShowOnboarding(true)}
+                className="mt-6 text-sm text-gray-500 underline"
+              >
+                ← Volver al tutorial
+              </button>
+            </motion.div>
+          </div>
+        </div>
+      )}
+
+      {/* Main App Content - Only show when onboarding is done AND wallet is connected AND correct network */}
+      {!showOnboarding && isConnected && isCorrectNetwork && (
         <>
           <div className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-gray-100  md:w-[80%] md:mx-auto">
             <div className="px-4 md:px-8 py-3 md:py-10 ">
@@ -290,6 +343,12 @@ export default function Home() {
                       { color: "pink" as ColorKey, key: "interna", data: etapa.mind },
                     ].map((block, i) => {
                       const styles = colorStyles[block.color];
+                      
+                      // Determine coin reward: 5 for first time, 1 for repeat
+                      const coinReward = block.key === "startup" 
+                        ? (hasCompletedStartupActions ? 1 : 5)
+                        : (hasCompletedMindActions ? 1 : 5);
+                      
                       return (
                         <motion.div
                           key={i}
@@ -324,7 +383,7 @@ export default function Home() {
                             })}
                           </ul>
                           <p className="text-[11px] md:text-[15px] text-gray-500 mt-2 text-center">
-                            Completá las acciones y ganá 5 🪙
+                            Completá las acciones y ganá {coinReward} 🪙
                           </p>
                         </motion.div>
                       );
