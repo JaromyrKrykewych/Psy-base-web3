@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useAccount, useWriteContract, useReadContract } from 'wagmi';
+import { useAccount, useWriteContract, useReadContract, useSwitchChain } from 'wagmi';
 import { formatEther } from 'viem'; //  parseEther,
 import { baseSepolia } from 'wagmi/chains';
 import PsychologyCoinsAbi from '../abi/PsychologyCoins.json';
@@ -7,9 +7,36 @@ import PsychologyCoinsAbi from '../abi/PsychologyCoins.json';
 const CONTRACT_ADDRESS = '0xB9b909a81E3E3254F1E7Db59CaA88CA369d8c100'; 
 const PSYCHOLOGY_COINS_ABI = JSON.parse(JSON.stringify(PsychologyCoinsAbi.abi));
 
+// Custom hook for network management
+export function useNetworkCheck() {
+  const { chain } = useAccount();
+  const { switchChain, isPending } = useSwitchChain();
+
+  const isCorrectNetwork = chain?.id === baseSepolia.id;
+  
+  const switchToBaseSepolia = useCallback(async () => {
+    if (!isCorrectNetwork) {
+      try {
+        await switchChain({ chainId: baseSepolia.id });
+      } catch (error) {
+        console.error('Error switching network:', error);
+        throw error;
+      }
+    }
+  }, [isCorrectNetwork, switchChain]);
+
+  return {
+    isCorrectNetwork,
+    currentChain: chain,
+    switchToBaseSepolia,
+    isSwitching: isPending,
+  };
+}
+
 // Custom hook for checking action completion status
 export function useActionStatus(actionId: string) {
-  const { address } = useAccount();
+  const { address, chain } = useAccount();
+  const isCorrectNetwork = chain?.id === baseSepolia.id;
   
   const { data: hasCompleted } = useReadContract({
     address: CONTRACT_ADDRESS,
@@ -18,7 +45,7 @@ export function useActionStatus(actionId: string) {
     args: address && actionId ? [address, actionId] : undefined,
     chainId: baseSepolia.id,
     query: {
-      enabled: !!(address && actionId),
+      enabled: !!(address && actionId && isCorrectNetwork),
     },
   });
 
@@ -29,13 +56,14 @@ export function useActionStatus(actionId: string) {
     args: address && actionId ? [address, actionId] : undefined,
     chainId: baseSepolia.id,
     query: {
-      enabled: !!(address && actionId),
+      enabled: !!(address && actionId && isCorrectNetwork),
     },
   });
 
   return {
     hasCompleted: !!hasCompleted,
     completionCount: completionCount ? Number(completionCount) : 0,
+    isCorrectNetwork,
   };
 }
 
@@ -43,6 +71,7 @@ export function usePsychologyCoins() {
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
   const [isLoading, setIsLoading] = useState(false);
+  const { isCorrectNetwork, switchToBaseSepolia, isSwitching } = useNetworkCheck();
 
   // Get user's coin balance
   const { data: balance, refetch: refetchBalance } = useReadContract({
@@ -52,7 +81,7 @@ export function usePsychologyCoins() {
     args: address ? [address] : undefined,
     chainId: baseSepolia.id,
     query: {
-      enabled: !!address,
+      enabled: !!address && isCorrectNetwork,
     },
   });
 
@@ -64,13 +93,19 @@ export function usePsychologyCoins() {
     args: address ? [address] : undefined,
     chainId: baseSepolia.id,
     query: {
-      enabled: !!address,
+      enabled: !!address && isCorrectNetwork,
     },
   });
 
-  // Complete an action
+  // Complete an action with network check
   const completeAction = useCallback(async (actionId: string) => {
     if (!address) return;
+    
+    // Check and switch network if needed
+    if (!isCorrectNetwork) {
+      await switchToBaseSepolia();
+      return; // Exit and let user retry after network switch
+    }
     
     setIsLoading(true);
     try {
@@ -93,7 +128,7 @@ export function usePsychologyCoins() {
     } finally {
       setIsLoading(false);
     }
-  }, [address, writeContractAsync, refetchBalance]);
+  }, [address, writeContractAsync, refetchBalance, isCorrectNetwork, switchToBaseSepolia]);
 
   // Function to check if user has completed a specific action
   const checkActionCompleted = useCallback((actionId: string) => {
@@ -114,6 +149,10 @@ export function usePsychologyCoins() {
     // Connection state
     isConnected: !!address,
     address,
+    // Network state
+    isCorrectNetwork,
+    switchToBaseSepolia,
+    isSwitching,
     // Data
     balance: balance && typeof balance === 'bigint' ? formatEther(balance) : '0',
     totalActionsCompleted: totalActionsCompleted ? Number(totalActionsCompleted) : 0,
