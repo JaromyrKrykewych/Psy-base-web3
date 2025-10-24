@@ -31,9 +31,9 @@ export default function Home() {
 
   const onboardingScreens = [
     {
-      title: "Construí tu Startup Mental",
+      title: "Construir tu MVP y escala tu salud mental",
       text:
-        "Vas a construir tu salud mental como si fuera una startup. Cada etapa tiene una lección, acciones y reflexiones emocionales.",
+        "En la construcción de una startup cada paso tiene un desafío emocional. Descubrí una guía, con lecciones, acciones y actividades para avanzar de manera saludable y eficiente.",
     },
     {
       title: "Progreso + Recompensas",
@@ -185,13 +185,13 @@ export default function Home() {
 
       {showOnboarding && (
         <div className="absolute inset-0 z-20 bg-white">
-          <div className="flex flex-col h-full items-center justify-between p-6 text-center">
+          <div className="flex flex-col h-full items-center justify-between p-6 text-center max-w-[600px] mx-auto">
             <div />
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <h2 className="text-2xl font-bold text-gray-900 mb-3">
                 {onboardingScreens[onboardingStep].title}
               </h2>
-              <p className="text-gray-600 text-base max-w-xs">
+              <p className="text-gray-600 text-base">
                 {onboardingScreens[onboardingStep].text}
               </p>
             </motion.div>
