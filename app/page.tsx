@@ -31,9 +31,20 @@ export default function Home() {
 
   const onboardingScreens = [
     {
-      title: "Construir tu MVP y escala tu salud mental",
-      text:
-        "En la construcción de una startup cada paso tiene un desafío emocional. Descubrí una guía, con lecciones, acciones y actividades para avanzar de manera saludable y eficiente.",
+      title: "Construí tu MVP y escalá tu salud mental.",
+      text: (
+        <>
+          Cada paso en una startup tiene su desafío emocional.
+          {/* <br /> */}
+          {' '}
+          Psy Founders es una guía gamificada con lecciones, acciones y actividades psicológicas, para construir tu proyecto de forma saludable y eficiente.
+          <br /><br />
+          Conectamos el método Lean Startup con herramientas psicológicas aplicadas a emprendedores.
+          {/* <br /> */}
+          {' '}
+          Para construir sin romperte en el proceso.
+        </>
+      ),
     },
     {
       title: "Progreso + Recompensas",
@@ -188,7 +199,7 @@ export default function Home() {
           <div className="flex flex-col h-full items-center justify-between p-6 text-center max-w-[600px] mx-auto">
             <div />
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">
+              <h2 className="text-2xl font-bold text-gray-900 mb-5 md:mb-7">
                 {onboardingScreens[onboardingStep].title}
               </h2>
               <p className="text-gray-600 text-base">
