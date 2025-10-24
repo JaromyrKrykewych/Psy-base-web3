@@ -20,8 +20,8 @@ export const minikitConfig = {
   miniapp: {
     version: "1",
     name: "Psychology for Founders",
-    subtitle: "",
-    description: "",
+    subtitle: "Construye tu startup y escala tu salud mental",
+    description: "Una guía paso a paso que conecta el método lean startup y herramientas psicológicas para que tus emociones no sean un obstáculo sino un impulso en la construcción de tu MVP.",
     screenshotUrls: [],
     iconUrl: `${ROOT_URL}/1024x1024.png`,
     splashImageUrl: `${ROOT_URL}/200x200.png`,
