@@ -10,16 +10,16 @@ const ROOT_URL =
  */
 export const minikitConfig = {
   accountAssociation: {
-    header: "",
-    payload: "",
-    signature: "",
+    header: "eyJmaWQiOjEzOTc3ODMsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHhhREMxMDVFZDJBMTgzQ2E2NTkwMWM2MzJiOTE5MGQwQjE4ZDg4MzIzIn0",
+    payload: "eyJkb21haW4iOiJwc3ljaC13ZWIzLnZlcmNlbC5hcHAifQ",
+    signature: "4wzKyNZCa2sKl2NuNLJEu9LlbxNgZd2pP3C0h0YsLx8mWFW1A2+FDa6A3dshyCOzf1Dyh/+JxU8PAfGSwmhopxw="
   },
   baseBuilder: {
-    allowedAddresses: [],
+    allowedAddresses: ["0xcf1c6C722c239bFE818eb9178939FE2338975E79"],
   },
   miniapp: {
     version: "1",
-    name: "psych",
+    name: "Psychology for Founders",
     subtitle: "",
     description: "",
     screenshotUrls: [],
